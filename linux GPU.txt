@@ -1,0 +1,105 @@
+sudo apt-get update
+sudo apt-get install -y build-essential git
+
+# Install all dependencies
+sudo apt-get install build-essential
+sudo apt-get install fort77
+sudo apt-get install xorg-dev
+sudo apt-get install liblzma-dev  libblas-dev gfortran
+sudo apt-get install gcc-multilib
+sudo apt-get install gobjc++
+sudo apt-get install aptitude
+sudo aptitude install libreadline-dev
+sudo aptitude install libcurl4-openssl-dev
+sudo apt-get install default-jdk
+sudo apt-get install texlive-latex-base
+sudo apt-get install libcairo2-dev 
+sudo apt-get install libxml2-dev
+sudo apt-get install libjpeg62
+sudo apt-get install t1-xfree86-nonfree ttf-xfree86-nonfree ttf-xfree86-nonfree-syriac xfonts-75dpi xfonts-100dpi
+
+# Install newest version of R from source
+wget https://cran.r-project.org/src/base/R-3/R-3.4.0.tar.gz
+tar -xzf R-3.4.0.tar.gz
+./configure --prefix=/home/R-3.4.0 --with-x=yes --enable-R-shlib=yes --with-cairo=yes
+make
+# NEWS.pdf file is missing and will make installation crash.
+touch doc/NEWS.pdf
+make install
+
+# Do not forget to update your PATH
+export PATH=~/R-3.4.0/bin:$PATH
+export RSTUDIO_WHICH_R=~/R-3.4.0/bin/R
+
+#install required R pacakges
+sudo R
+install.packages("devtools")
+library(devtools)
+#igraph has to come from github as vran version is bugged
+install_github("igraph/rigraph")
+install.packages(c('DiagrammeR', 'roxygen2', 'rgexf', 'influenceR', 'Cairo', 'imager'))
+
+# Download Rstudio and install it. (check for more recent versions!)
+wget https://download1.rstudio.org/rstudio-1.0.143-amd64.deb
+sudo dpkg -i rstudio-1.0.143-amd64.deb
+#alternatively 
+#sudo wget https://download2.rstudio.org/rstudio-server-rhel-1.1.383-x86_64.rpm
+#sudo yum install --nogpgcheck rstudio-server-rhel-1.1.383-x86_64.rpm
+
+# That's it type rstudio and all should be good!
+# update password for 'rstudio' user
+sudo passwd rstudio
+
+#You can add elements to the default LD_LIBRARY_PATH for R sessions (as determined by the R ldpaths script) by adding an rsession-ld-library-path entry to the server config file. 
+#This might be useful for ensuring that packages can locate external library dependencies that aren't installed in the system standard library paths. For example:
+cd /etc/rstudio
+sudo nano rserver.conf
+#add and save
+rsession-which-r=/home/ubuntu/R-3.4.0/bin/R
+rsession-ld-library-path=/opt/local/lib:/usr/local/cuda/lib64
+
+#rstudio cli commands
+# sudo rstudio-server stop
+# sudo rstudio-server start
+# sudo rstudio-server restart
+
+#much of the following is directly from https://mxnet.incubator.apache.org/install/index.html
+#choose R and GPU
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:$LD_LIBRARY_PATH
+
+git clone --recursive https://github.com/apache/incubator-mxnet
+cd incubator-mxnet
+cd make
+sudo nano config.mk
+#make the following changes
+USE_OPENCV = 1
+USE_CUDA = 1
+#you will need to set cuda path if you did not add to enviroment variable 
+USE_CUDA_PATH = NONE
+USE_CUDNN = 1
+
+cd ..
+make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas USE_CUDA=1 USE_CUDA_PATH=/usr/local/cuda USE_CUDNN=1
+# it's '-j8' for example, (nproc) is the number of processors, think you can leave it as is
+
+make rpkg
+R CMD INSTALL mxnet_current_r.tar.gz
+
+#validate the install
+sudo R
+library(mxnet)
+a <- mx.nd.ones(c(2,3), ctx = mx.gpu())
+b <- a * 2 + 1
+b
+#should be 2x3 matrix with all elements being 3
+
+
+
+
+
+
+
+
+
+
+
