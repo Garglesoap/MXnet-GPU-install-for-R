@@ -47,8 +47,8 @@ sudo dpkg -i rstudio-1.0.143-amd64.deb
 #sudo yum install --nogpgcheck rstudio-server-rhel-1.1.383-x86_64.rpm
 
 # That's it type rstudio and all should be good!
-# update password for 'rstudio' user
-sudo passwd rstudio
+# update password for _____ user
+sudo passwd _____
 
 #You can add elements to the default LD_LIBRARY_PATH for R sessions (as determined by the R ldpaths script) by adding an rsession-ld-library-path entry to the server config file. 
 #This might be useful for ensuring that packages can locate external library dependencies that aren't installed in the system standard library paths. For example:
